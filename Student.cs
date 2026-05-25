@@ -1,99 +1,49 @@
 ﻿using System;
-using System.Text.RegularExpressions;
-
-namespace StudentManagement;
+using System.Text;
 
 public class Student
 {
-    private string _fullName = string.Empty;
-    private string _personalEmail = string.Empty;
-    private string _recordBookNumber = string.Empty;
+    private string _fullName;
 
-    public required string RecordBookNumber
-    {
-        get => _recordBookNumber;
-        set
-        {
-            if (value.Length != 8 || !long.TryParse(value, out _))
-                throw new ArgumentException("Номер залікової книжки має складатись рівно з 8 цифр.");
-            _recordBookNumber = value;
-        }
-    }
-
+    // Валідація ПІБ (має містити щонайменше три слова)
     public string FullName
     {
         get => _fullName;
         set
         {
-            if (string.IsNullOrWhiteSpace(value) || value.Length < 5)
-                throw new ArgumentException("ПІБ не може бути порожнім і має містити мінімум 5 символів.");
+            if (string.IsNullOrWhiteSpace(value) ||
+                value.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length < 3)
+            {
+                throw new ArgumentException("FullName має містити щонайменше три слова (прізвище, ім’я, по батькові).");
+            }
             _fullName = value;
         }
     }
 
-    public DateTime DateOfBirth { get; init; }
+    public string Notes { get; set; } = "";
+    public int Grade { get; set; }
 
-    public int Age
+    // Реалізація через StringBuilder (вимога ПР №3)
+    public string GetFormattedInfo(bool detailed = false)
     {
-        get
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine($"Студент: {FullName}");
+
+        if (detailed)
         {
-            var today = DateTime.Today;
-            var age = today.Year - DateOfBirth.Year;
-            if (DateOfBirth.Date > today.AddYears(-age)) age--;
-            return age;
+            sb.AppendLine($"Оцінка: {Grade}");
+            sb.AppendLine($"Нотатки: {Notes}");
         }
+
+        return sb.ToString();
     }
 
-    public double AverageGrade { get; private set; }
-
-    public StudentStatus Status { get; set; } = StudentStatus.Active;
-    public DateTime EnrollmentDate { get; init; } = DateTime.Now;
-    public string Notes { get; set; } = string.Empty;
-
-    public string PersonalEmail
+    // Перевірка на наявність ключового слова у нотатках
+    public bool ContainsKeyword(string keyword)
     {
-        get => _personalEmail;
-        set
-        {
-            if (!Regex.IsMatch(value, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-                throw new ArgumentException("Некоректний формат email.");
-            _personalEmail = value;
-        }
-    }
+        if (string.IsNullOrEmpty(keyword) || string.IsNullOrEmpty(Notes))
+            return false;
 
-    public GradeJournal Journal { get; } = new();
-
-    public void UpdateAverageGrade()
-    {
-        AverageGrade = Journal.CalculateAverage();
-    }
-
-    public void AddGrade(string subject, double grade)
-    {
-        if (grade < 0 || grade > 100) throw new ArgumentException("Оцінка має бути від 0 до 100.");
-        Journal.Grades[subject] = grade;
-        UpdateAverageGrade();
-    }
-
-    public bool IsExcellent() => AverageGrade >= 90;
-
-    public bool IsFailing() => AverageGrade < 60;
-
-    public int GetYearsToGraduation(int totalProgramYears = 4)
-    {
-        int yearsStudied = DateTime.Now.Year - EnrollmentDate.Year;
-        int yearsLeft = totalProgramYears - yearsStudied;
-        return yearsLeft > 0 ? yearsLeft : 0;
-    }
-
-    public void ShowDetailedInfo()
-    {
-        Console.WriteLine("=====================================");
-        Console.WriteLine($"Студент: {FullName} (Залікова: {RecordBookNumber})");
-        Console.WriteLine($"Вік: {Age}");
-        Console.WriteLine($"Email: {PersonalEmail}");
-        Console.WriteLine($"Статус: {Status}");
-        Console.WriteLine($"Середній бал: {AverageGrade}");
-        Console.WriteLine("=====================================");
+        return Notes.Contains(keyword, StringComparison.OrdinalIgnoreCase);
     }
 }
