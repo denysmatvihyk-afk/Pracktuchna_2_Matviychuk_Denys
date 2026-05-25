@@ -11,7 +11,7 @@ public class StudentGroup
     public string GroupName { get; set; } = string.Empty;
     public string Specialty { get; set; } = string.Empty;
     public int Course { get; set; }
-
+    public List<Student> Students => _students;
     // Приватне поле (інкапсуляція списку)
     private List<Student> _students = new();
 
