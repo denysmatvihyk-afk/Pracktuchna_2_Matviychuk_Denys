@@ -1,76 +1,70 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text.Json;
-
-namespace StudentManagement;
+using System.Text;
 
 public class StudentGroup
 {
-    public string GroupName { get; set; } = string.Empty;
-    public string Specialty { get; set; } = string.Empty;
-    public int Course { get; set; }
+    // Припускаю, що у тебе вже є список студентів
+    private List<Student> _students = new List<Student>();
 
-    // Приватне поле (інкапсуляція списку)
-    private List<Student> _students = new();
+    public void AddStudent(Student student) => _students.Add(student);
 
-    public int GroupSize => _students.Count;
-
-    public double AverageGroupGrade => _students.Any() ? Math.Round(_students.Average(s => s.AverageGrade), 2) : 0;
-
-    // Безпечний доступ до списку тільки для читання
-    public IReadOnlyList<Student> Students => _students.AsReadOnly();
-
-    public void AddStudent(Student student)
+    [cite_start]// Пошук за фрагментом імені [cite: 17]
+    public string SearchByNameFragment(string fragment)
     {
-        if (_students.Any(s => s.RecordBookNumber == student.RecordBookNumber))
-            throw new InvalidOperationException("Студент з такою заліковою книжкою вже існує.");
+        var found = _students.Where(s => s.FullName.Contains(fragment, StringComparison.OrdinalIgnoreCase)).ToList();
 
-        _students.Add(student);
-    }
+        if (!found.Any()) return "Студентів не знайдено.";
 
-    public bool RemoveStudent(string recordBookNumber)
-    {
-        var student = _students.FirstOrDefault(s => s.RecordBookNumber == recordBookNumber);
-        if (student != null)
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("Знайдені студенти:");
+        foreach (var s in found)
         {
-            _students.Remove(student);
-            return true;
+            sb.AppendLine($"- {s.FullName}");
         }
-        return false;
+        return sb.ToString();
     }
 
-    // Перевантажені методи пошуку (як вимагає завдання)
-    public Student? FindStudent(string recordBookNumber) =>
-        _students.FirstOrDefault(s => s.RecordBookNumber == recordBookNumber);
-
-    public IEnumerable<Student> FindStudentByName(string namePart) =>
-        _students.Where(s => s.FullName.Contains(namePart, StringComparison.OrdinalIgnoreCase));
-
-    public IEnumerable<Student> GetExcellentStudents() => _students.Where(s => s.IsExcellent());
-
-    public IEnumerable<Student> GetStudentsByStatus(StudentStatus status) =>
-        _students.Where(s => s.Status == status);
-
-    // Збереження та завантаження JSON
-    public void SaveToFile(string filePath)
+    [cite_start]// Експорт у CSV [cite: 18]
+    public string ExportToCsv()
     {
-        var options = new JsonSerializerOptions { WriteIndented = true };
-        string json = JsonSerializer.Serialize(_students, options);
-        File.WriteAllText(filePath, json);
-    }
-
-    public void LoadFromFile(string filePath)
-    {
-        if (!File.Exists(filePath)) return;
-
-        try
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("FullName,Grade,Notes");
+        foreach (var s in _students)
         {
-            string json = File.ReadAllText(filePath);
-            var loaded = JsonSerializer.Deserialize<List<Student>>(json);
-            if (loaded != null) _students = loaded;
+            // Екранування ком у нотатках, щоб не зламати CSV формат
+            string safeNotes = s.Notes != null && s.Notes.Contains(",") ? $"\"{s.Notes}\"" : s.Notes;
+            sb.AppendLine($"{s.FullName},{s.Grade},{safeNotes}");
         }
-        catch { }
+        return sb.ToString();
+    }
+
+    [cite_start]// Імпорт з сирого тексту [cite: 19]
+    public void ImportStudentsFromText(string rawText)
+    {
+        if (string.IsNullOrWhiteSpace(rawText)) return;
+
+        var lines = rawText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        foreach (var line in lines)
+        {
+            var parts = line.Split(',');
+            if (parts.Length >= 3)
+            {
+                try
+                {
+                    _students.Add(new Student
+                    {
+                        FullName = parts[0].Trim(),
+                        Grade = int.Parse(parts[1].Trim()),
+                        Notes = parts[2].Trim().Trim('"')
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Помилка імпорту рядка '{line}': {ex.Message}");
+                }
+            }
+        }
     }
 }
