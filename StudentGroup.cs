@@ -1,42 +1,36 @@
-﻿// 1. Індексатор для пошуку за номером залікової книжки
-// Дозволяє звертатися до групи як до масиву: group["12345678"]
-public Student this[string recordBookNumber]
+﻿using System.Collections.Generic;
+using System.Linq;
+
+public class StudentGroup
 {
-    get => _students.FirstOrDefault(s => s.RecordBookNumber == recordBookNumber);
-}
-// 2. Оператор + для об'єднання двох груп в одну нову
-// Реалізує логіку злиття списків студентів двох об'єктів
-public static StudentGroup operator +(StudentGroup g1, StudentGroup g2)
-{
-    var mergedGroup = new StudentGroup
+    public List<Student> Students { get; set; } = new List<Student>();
+
+    public static StudentGroup operator +(StudentGroup a, StudentGroup b)
     {
-        GroupName = $"{g1.GroupName}+{g2.GroupName}",
-        Specialization = g1.Specialization,
-        Course = g1.Course
-    };
-    mergedGroup._students.AddRange(g1._students);
-
-
-    mergedGroup._students.AddRange(g2._students);
-    mergedGroup.LogAction($"Об'єднано групи {g1.GroupName} та {g2.GroupName}");
-    return mergedGroup;
-}
-// 3. Метод для виклику оператора + (вимога ПР щодо альтернативного виклику)
-public StudentGroup MergeGroups(StudentGroup other) => this + other;
-
-// 4. Пошук найкращого студента за допомогою перевантаженого оператора >
-// Цей метод демонструє практичне застосування перевантаження операторів у класі Student
-public Student BestStudent()
-{
-    if (!_students.Any()) return null;
-    Student best = _students[0];
-    foreach (var student in _students)
-    {
-        // Використовується перевантажений оператор > з класу Student
-        if (student > best)
-        {
-            best = student;
-        }
+        var newGroup = new StudentGroup();
+        newGroup.Students.AddRange(a.Students);
+        newGroup.Students.AddRange(b.Students);
+        return newGroup;
     }
-    return best;
+
+    public Student this[int index]
+    {
+        get => Students.FirstOrDefault(s => s.RecordBookNumber == index);
+    }
+
+    public Student BestStudent()
+    {
+        if (Students.Count == 0) return null;
+        Student best = Students[0];
+        foreach (var s in Students)
+        {
+            if (s > best) best = s;
+        }
+        return best;
+    }
+
+    public StudentGroup MergeGroups(StudentGroup other)
+    {
+        return this + other;
+    }
 }
