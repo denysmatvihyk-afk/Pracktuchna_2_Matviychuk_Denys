@@ -1,76 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-
-namespace StudentManagement;
-
-public class StudentGroup
+﻿// 1. Індексатор для пошуку за номером залікової книжки
+// Дозволяє звертатися до групи як до масиву: group["12345678"]
+public Student this[string recordBookNumber]
 {
-    public string GroupName { get; set; } = string.Empty;
-    public string Specialty { get; set; } = string.Empty;
-    public int Course { get; set; }
-
-    // Приватне поле (інкапсуляція списку)
-    private List<Student> _students = new();
-
-    public int GroupSize => _students.Count;
-
-    public double AverageGroupGrade => _students.Any() ? Math.Round(_students.Average(s => s.AverageGrade), 2) : 0;
-
-    // Безпечний доступ до списку тільки для читання
-    public IReadOnlyList<Student> Students => _students.AsReadOnly();
-
-    public void AddStudent(Student student)
+    get => _students.FirstOrDefault(s => s.RecordBookNumber == recordBookNumber);
+}
+// 2. Оператор + для об'єднання двох груп в одну нову
+// Реалізує логіку злиття списків студентів двох об'єктів
+public static StudentGroup operator +(StudentGroup g1, StudentGroup g2)
+{
+    var mergedGroup = new StudentGroup
     {
-        if (_students.Any(s => s.RecordBookNumber == student.RecordBookNumber))
-            throw new InvalidOperationException("Студент з такою заліковою книжкою вже існує.");
+        GroupName = $"{g1.GroupName}+{g2.GroupName}",
+        Specialization = g1.Specialization,
+        Course = g1.Course
+    };
+    mergedGroup._students.AddRange(g1._students);
 
-        _students.Add(student);
-    }
 
-    public bool RemoveStudent(string recordBookNumber)
+    mergedGroup._students.AddRange(g2._students);
+    mergedGroup.LogAction($"Об'єднано групи {g1.GroupName} та {g2.GroupName}");
+    return mergedGroup;
+}
+// 3. Метод для виклику оператора + (вимога ПР щодо альтернативного виклику)
+public StudentGroup MergeGroups(StudentGroup other) => this + other;
+
+// 4. Пошук найкращого студента за допомогою перевантаженого оператора >
+// Цей метод демонструє практичне застосування перевантаження операторів у класі Student
+public Student BestStudent()
+{
+    if (!_students.Any()) return null;
+    Student best = _students[0];
+    foreach (var student in _students)
     {
-        var student = _students.FirstOrDefault(s => s.RecordBookNumber == recordBookNumber);
-        if (student != null)
+        // Використовується перевантажений оператор > з класу Student
+        if (student > best)
         {
-            _students.Remove(student);
-            return true;
+            best = student;
         }
-        return false;
     }
-
-    // Перевантажені методи пошуку (як вимагає завдання)
-    public Student? FindStudent(string recordBookNumber) =>
-        _students.FirstOrDefault(s => s.RecordBookNumber == recordBookNumber);
-
-    public IEnumerable<Student> FindStudentByName(string namePart) =>
-        _students.Where(s => s.FullName.Contains(namePart, StringComparison.OrdinalIgnoreCase));
-
-    public IEnumerable<Student> GetExcellentStudents() => _students.Where(s => s.IsExcellent());
-
-    public IEnumerable<Student> GetStudentsByStatus(StudentStatus status) =>
-        _students.Where(s => s.Status == status);
-
-    // Збереження та завантаження JSON
-    public void SaveToFile(string filePath)
-    {
-        var options = new JsonSerializerOptions { WriteIndented = true };
-        string json = JsonSerializer.Serialize(_students, options);
-        File.WriteAllText(filePath, json);
-    }
-
-    public void LoadFromFile(string filePath)
-    {
-        if (!File.Exists(filePath)) return;
-
-        try
-        {
-            string json = File.ReadAllText(filePath);
-            var loaded = JsonSerializer.Deserialize<List<Student>>(json);
-            if (loaded != null) _students = loaded;
-        }
-        catch { }
-    }
+    return best;
 }

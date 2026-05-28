@@ -1,0 +1,23 @@
+* [33m16bba28[m[33m ([m[1;32mfeature/menu-text-module[m[33m)[m feat: Додано інтерактивне меню та підключено всі модулі текстової обробки
+[31m|[m * [33m9cf4e1a[m[33m ([m[1;32mfeature/variant-4[m[33m)[m feat: Додано генератор характеристик студентів (Варіант 4)
+[31m|[m[31m/[m  
+[31m|[m * [33m1662a7c[m[33m ([m[1;32mfeature/advanced-logger[m[33m)[m feat: Реалізовано клас AdvancedLogger на базі StringBuilder
+[31m|[m[31m/[m  
+* [33m60f4e3d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mrefactor/final-cleanup[m[33m, [m[1;32mdevelop[m[33m)[m feat: Додано базові методи класу TextProcessor для обробки тексту
+[33m|[m * [33mc08684a[m[33m ([m[1;32mfeature/group-text-methods[m[33m)[m feat: Додано методи пошуку, імпорту та експорту в StudentGroup
+[33m|[m[33m/[m  
+[33m|[m * [33m15f204d[m[33m ([m[1;32mfeature/student-string-extensions[m[33m)[m feat: Розширено клас Student методами GetFormattedInfo та ContainsKeyword, додано валідацію FullName
+[33m|[m[33m/[m  
+[33m|[m * [33mf0f4d82[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m feat: додано масив оцінок LabGrades до класу Student
+[33m|[m * [33m26e493d[m first commit
+[33m|[m[33m/[m  
+*   [33m6f96c34[m[33m ([m[1;31morigin/feature/student-lab-grades[m[33m, [m[1;31morigin/feature/stringbuilder-logger[m[33m, [m[1;31morigin/feature/port-matrix[m[33m, [m[1;31morigin/develop[m[33m, [m[1;32mfeature/text-processor-core[m[33m, [m[1;32mfeature/student-lab-grades[m[33m, [m[1;32mfeature/stringbuilder-logger[m[33m, [m[1;32mfeature/port-matrix[m[33m)[m merge 3
+[1;31m|[m[1;32m\[m  
+[1;31m|[m * [33m0eaac97[m[33m ([m[1;31morigin/feature/file-storage[m[33m, [m[1;32mfeature/file-storage[m[33m)[m Додано файл зв?ту REPORT.md
+* [1;32m|[m   [33mc335194[m merge 2
+[1;33m|[m[1;34m\[m [1;32m\[m  
+[1;33m|[m * [1;32m|[m [33m7d7afb2[m[33m ([m[1;31morigin/feature/group-management[m[33m, [m[1;32mfeature/group-management[m[33m)[m Додано лог?ку групи та консольне меню
+[1;33m|[m [1;32m|[m[1;32m/[m  
+* [1;32m/[m [33macc92dc[m[33m ([m[1;31morigin/feature/student-class[m[33m, [m[1;32mfeature/student-class[m[33m)[m Додано класи Student та GradeJournal
+[1;32m|[m[1;32m/[m  
+* [33m97df970[m Initial setup
